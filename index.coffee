@@ -11,7 +11,7 @@ stdin.setRawMode true
 
 stdin.on 'keypress', (ch, key) ->
   process.exit() if key.ctrl and key.name is 'c'
-  ime.jaIn char2JaMap[ch]
+  ime.jamoIn char2JaMap[ch]
 
 char2JaMap =
   q: 'ㅂ'
