@@ -9,11 +9,75 @@ Range
   jungSeong = [0x1161..0x1175]
   jongSeong = [0x11A8..0x11CE]
 ###
+UTF8_START_CODE = 0xAC00
 
+currentHangul = ""
+
+exports.clear = ->
+  currentHangul = ""
+
+exports.getCurrentHangul = ->
+  currentHangul
+
+class Hangul
+  constructor: ->
+    @lastChanged = "choSeong"
+
+  setChoSeong: (@choSeong) ->
+    console.log "choSeong set as #{@choSeong}"
+    @changedBy 'choSeong'
+  setJungSeong: (@jungSeong) ->
+    console.log "jung set as #{@jungSeong}"
+    @changedBy 'jungSeong'
+  setJongSeong: (@jongSeong) ->
+    console.log "jongSeong set as #{@jongSeong}"
+    @changedBy 'jongSeong'
+
+  isWaitChoSeong: ->
+    not @jungSeong
+  isWaitJungSeong: ->
+    @choSeong and not @jongSeong
+  isWaitJongSeong: ->
+    @choSeong and @jungSeong
+  changedBy: (changed) ->
+    console.log "Changed: #{@lastChanged} to #{changed}"
+    if @lastChanged isnt changed
+      @lastChanged = changed
+      @statusChanged = true
+    else
+      @statusChanged = false
+  isChangeStatus: ->
+    @statusChanged
+  toChar: ->
+    console.log "Done"
+
+hangul = new Hangul()
+inJamo = ""
 exports.jamoIn = (jamo) ->
-  charCode = jamo.charCodeAt 0
-  console.log "jamo:#{jamo}(#{charCode})"
-  console.log "choSeongMap:#{choSeongMap[jamo]}"
+  inJamo += jamo
+  console.log "inJamo: #{inJamo}"
+  if choSeongMap.hasOwnProperty inJamo
+    if hangul.isWaitChoSeong()
+      hangul.setChoSeong inJamo
+    else
+      hangul.toChar()
+  else if jungSeongMap.hasOwnProperty inJamo
+    if hangul.isWaitJungSeong()
+      hangul.setJungSeong inJamo
+    else
+      hangul.toChar()
+  else if jongSeongMap.hasOwnProperty inJamo
+    if hangul.isWaitJongSeong()
+      hangul.setJongSeong inJamo
+    else
+      hangul.toChar()
+  if hangul.isChangeStatus()
+    inJamo = ""
+
+  #charCode = jamo.charCodeAt 0
+  #currentHangul = String.fromCharCode charCode
+  #console.log "jamo:#{jamo}(#{charCode})"
+  #console.log "choSeongMap:#{choSeongMap[jamo]}"
 
 choSeongMap =
   'ㄱ':0 #'ᄀ'

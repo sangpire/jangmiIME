@@ -20,7 +20,8 @@
     "keypress": "*"
   },
   "devDependencies": {
-    "mocha": "*"
+    "mocha": "*",
+    "should": "*"
   },
   "license": "BSD-2-Clause"
 }
