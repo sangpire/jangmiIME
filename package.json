@@ -3,9 +3,24 @@
   "version": "0.0.0",
   "description": "Korean Chractor(Hangul) IME",
   "main": "index.coffee",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "author": {
+    "name": "BYUN Sangpil",
+    "email": "sangpire@gmail.com"
   },
-  "author": "",
+  "scripts": {
+    "start": "coffee index.coffee",
+    "test": "make test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sangpire/jangmiIME"
+  },
+  "dependencies": {
+    "coffee-script": "*",
+    "keypress": "*"
+  },
+  "devDependencies": {
+    "mocha": "*"
+  },
   "license": "BSD-2-Clause"
 }
