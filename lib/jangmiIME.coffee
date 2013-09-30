@@ -50,16 +50,20 @@ hangul = new Hangul()
 inJamo = ""
 exports.jamoIn = (jamo) ->
   inJamo += jamo
-  console.log "inJamo>#{inJamo}<"
-
+  console.log "inJamo ->#{inJamo}<-"
   if hangul.isWaitChoSeong()
     if choSeongMap.hasOwnProperty inJamo
       hangul.setChoSeong inJamo
       hangul.curJa()
     else
+      console.log jamo, jungSeongMap.hasOwnProperty jamo
       if jungSeongMap.hasOwnProperty jamo
-        inJamo = jamo
-        hangul.setJungSeong jamo
+        if hangul.isWaitJungSeong()
+          inJamo = jamo
+          hangul.setJungSeong jamo
+        else
+          inJamo = ""
+          jamo
       else
         inJamo = ""
         hangul.getJa()
@@ -114,27 +118,34 @@ choSeongMap =
   'ㅎ':18#'ᄒ'
 
 jungSeongMap =
-  'ᅡ':0
-  'ᅢ':1
-  'ᅣ':2
-  'ᅤ':3
-  'ᅥ':4
-  'ᅦ':5
-  'ᅧ':6
-  'ᅨ':7
-  'ᅩ':8
-  'ᅪ':9
-  'ᅫ':10
-  'ᅬ':11
-  'ᅭ':12
-  'ᅮ':13
-  'ᅯ':14
-  'ᅰ':15
-  'ᅱ':16
-  'ᅲ':17
-  'ᅳ':18
-  'ᅴ':19
-  'ᅵ':20
+  'ㅏ':0  #'ᅡ'
+  'ㅐ':1  #'ᅢ'
+  'ㅑ':2  #'ᅣ'
+  'ㅒ':3  #'ᅤ'
+  'ㅓ':4  #'ᅥ'
+  'ㅔ':5  #'ᅦ'
+  'ㅕ':6  #'ᅧ'
+  'ㅖ':7  #'ᅨ'
+  'ㅗ':8  #'ᅩ'
+  'ㅘ':9  #'ᅪ'
+  'ㅗㅏ':9  #'ᅪ'
+  'ㅙ':10 #'ᅫ'
+  'ㅗㅐ':10 #'ᅫ'
+  'ㅚ':11 #'ᅬ'
+  'ㅗㅣ':11 #'ᅬ'
+  'ㅛ':12 #'ᅭ'
+  'ㅜ':13 #'ᅮ'
+  'ㅝ':14 #'ᅯ'
+  'ㅜㅓ':14 #'ᅯ'
+  'ㅞ':15 #'ᅰ'
+  'ㅜㅔ':15 #'ᅰ'
+  'ㅟ':16 #'ᅱ'
+  'ㅜㅣ':16 #'ᅱ'
+  'ㅠ':17 #'ᅲ'
+  'ㅡ':18 #'ᅳ'
+  'ㅢ':19 #'ᅴ'
+  'ㅡㅣ':19 #'ᅴ'
+  'ㅣ':20 #'ᅵ'
 
 jongSeongMap =
   'ᆨ':0
