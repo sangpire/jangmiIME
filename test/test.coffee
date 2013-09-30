@@ -12,8 +12,8 @@ describe 'jangmiIME', ->
   it "should return 'ㅏ' when type 'ㅏ'", ->
     assert.equal ime.jamoIn( 'ㅏ'), 'ㅏ'
 
-#  it "should return '가' when type 'ㄱㅏ'", ->
-#    ime.jamoIn 'ㄱ'
-#    ime.jamoIn 'ㅏ'
-#    assert.equal ime.getCurrentHangul(), '가'
-#
+  it "should return '가' when type 'ㄱㅏ'", ->
+    ime.jamoIn 'ㄱ'
+    ime.jamoIn 'ㅏ'
+    assert.equal ime.getCurrentHangul(), '가'
+

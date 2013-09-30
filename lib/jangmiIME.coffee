@@ -37,9 +37,12 @@ class Hangul
     @choSeong and @jungSeong
 
   getJa: ->
-    ja = @choSeong if @choSeong?
-    @choSeong = ""
-    @jungSeong = ""
+    if @choSeong?
+      ja = @choSeong
+      @choSeong = ""
+    if @jungSeong?
+      chDiff =  UTF8_START_CODE + (choSeongMap[@choSeong] * 588)
+      @jungSeong = ""
     @jongSeong = ""
     return ja
 
@@ -49,6 +52,12 @@ class Hangul
 hangul = new Hangul()
 inJamo = ""
 exports.jamoIn = (jamo) ->
+
+  joHapEnd= ->
+    console.log "joHap End"
+    inJamo= ""
+    hangul.getJa()
+
   inJamo += jamo
   console.log "inJamo ->#{inJamo}<-"
   if hangul.isWaitChoSeong()
@@ -56,17 +65,12 @@ exports.jamoIn = (jamo) ->
       hangul.setChoSeong inJamo
       hangul.curJa()
     else
-      console.log jamo, jungSeongMap.hasOwnProperty jamo
       if jungSeongMap.hasOwnProperty jamo
         if hangul.isWaitJungSeong()
           inJamo = jamo
           hangul.setJungSeong jamo
-        else
-          inJamo = ""
-          jamo
       else
-        inJamo = ""
-        hangul.getJa()
+        joHapEnd()+jamo
   else if hangul.isWaitJungSeong()
   else if hangul.isWaitJongSeong()
   else
