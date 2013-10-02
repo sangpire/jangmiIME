@@ -9,96 +9,87 @@ Range
   jungSeong = [0x1161..0x1175]
   jongSeong = [0x11A8..0x11CE]
 ###
-UTF8_START_CODE = 0xAC00
 
-currentHangul = ""
+debug = console.log
 
-exports.clear = ->
-  currentHangul = ""
-
-exports.getCurrentHangul = ->
-  currentHangul
+UTF8_START_CODE     = 0xAC00
+UTF8_CHOSEONG_DIFF  = '까'.charCodeAt(0) - '가'.charCodeAt(0)
+UTF8_JUNGSEONG_DIFF = '개'.charCodeAt(0) - '가'.charCodeAt(0)
+UTF8_JONGSEONG_DIFF = '각'.charCodeAt(0) - '가'.charCodeAt(0)
 
 class Hangul
-  constructor: ->
+  ###
+  @listener =
+    write: call
+  ###
+  constructor: (@listener)->
+    @curJamo = ""
+
+  reset: ->
+    @curJamo = ""
+    [@choSeong, @jungSeong, @jongSeong] = [null, null, null]
 
   setChoSeong: (@choSeong) ->
-    console.log "choSeong set as #{@choSeong}"
   setJungSeong: (@jungSeong) ->
-    console.log "jung set as #{@jungSeong}"
   setJongSeong: (@jongSeong) ->
-    console.log "jongSeong set as #{@jongSeong}"
 
   isWaitChoSeong: ->
-    not @jungSeong
+    not @jungSeong?
   isWaitJungSeong: ->
-    @choSeong and not @jongSeong
+    @choSeong? and not @jongSeong?
   isWaitJongSeong: ->
-    @choSeong and @jungSeong
+    @choSeong? and @jungSeong?
 
-  getJa: ->
-    if @choSeong?
-      ja = @choSeong
-      @choSeong = ""
-    if @jungSeong?
-      chDiff =  UTF8_START_CODE + (choSeongMap[@choSeong] * 588)
-      @jungSeong = ""
-    @jongSeong = ""
-    return ja
-
-  curJa: ->
-    @choSeong
-
-hangul = new Hangul()
-inJamo = ""
-exports.jamoIn = (jamo) ->
-
-  joHapEnd= ->
-    console.log "joHap End"
-    inJamo= ""
-    hangul.getJa()
-
-  inJamo += jamo
-  console.log "inJamo ->#{inJamo}<-"
-  if hangul.isWaitChoSeong()
-    if choSeongMap.hasOwnProperty inJamo
-      hangul.setChoSeong inJamo
-      hangul.curJa()
-    else
-      if jungSeongMap.hasOwnProperty jamo
-        if hangul.isWaitJungSeong()
-          inJamo = jamo
-          hangul.setJungSeong jamo
+  add: (jamo) ->
+    @curJamo += jamo
+    debug ">#{jamo}< ==> #{@curJamo}"
+    debug "isWaitSeong: #{@isWaitJungSeong()}"
+    debug "isWaitJungSeong: #{@isWaitJungSeong()}"
+    if @isWaitChoSeong()
+      if choSeongMap.hasOwnProperty @curJamo
+        @choSeong = @curJamo
       else
-        joHapEnd()+jamo
-  else if hangul.isWaitJungSeong()
-  else if hangul.isWaitJongSeong()
-  else
-    inJamo = ""
-    hangul.getJa() +  jamo
+        if jungSeongMap.hasOwnProperty jamo
+          if hangul.isWaitJungSeong()
+            @curJamo = jamo
+            @jungSeong = @curJamo
+          else
+            @listener.write jamo
+    else if @isWaitJungSeong()
+    else if isWaitJongSeong()
+    else
 
-#  if choSeongMap.hasOwnProperty inJamo
-#    if hangul.isWaitChoSeong()
-#      hangul.setChoSeong inJamo
-#    else
-#      hangul.toChar()
-#  else if jungSeongMap.hasOwnProperty inJamo
-#    if hangul.isWaitJungSeong()
-#      hangul.setJungSeong inJamo
-#    else
-#      hangul.toChar()
-#  else if jongSeongMap.hasOwnProperty inJamo
-#    if hangul.isWaitJongSeong()
-#      hangul.setJongSeong inJamo
-#    else
-#      hangul.toChar()
-#  if hangul.isChangeStatus()
-#    inJamo = ""
-#
-#  #charCode = jamo.charCodeAt 0
-  #currentHangul = String.fromCharCode charCode
-  #console.log "jamo:#{jamo}(#{charCode})"
-  #console.log "choSeongMap:#{choSeongMap[jamo]}"
+  ###
+    peep current hangul
+  ###
+  peep: ->
+    debug "[#{@choSeong}|#{@jungSeong}|#{@jongSeong}]"
+    if @choSeong? and @jungSeong?
+      code = UTF8_START_CODE + choSeongMap[@choSeong]
+      code += jungSeongMap[@jungSeong] * UTF8_JUNGSEONG_DIFF
+      code += jongSeongMap[@jongSeong] * UTF8_JONGSEONG_DIFF if @jongSeong?
+      String.fromCharCode code
+    else
+      @choSeong
+
+
+written = null
+hangul = new Hangul
+  write: (gul) ->
+    debug "hangul writed as #{gul}"
+    written = gul
+
+exports.reset = ->
+  hangul.reset()
+
+exports.jamoIn = (jamo) ->
+  hangul.add jamo
+  if written?
+    [ret, written] = [written, null]
+    ret
+  else
+    hangul.peep()
+
 
 choSeongMap =
   'ㄱ':0 #'ᄀ'
