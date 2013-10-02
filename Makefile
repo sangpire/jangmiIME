@@ -1,6 +1,6 @@
 
 MOCHA = ./node_modules/mocha/bin/mocha
-MOCHA_OPTS = --compilers coffee:coffee-script
+MOCHA_OPTS = --bail --compilers coffee:coffee-script --reporter spec
 
 input:
 	coffee input.coffee
@@ -9,6 +9,6 @@ test:
 	@${MOCHA} ${MOCHA_OPTS} 
 
 test-watch:
-	@${MOCHA} ${MOCHA_OPTS} -w
+	@${MOCHA} ${MOCHA_OPTS} --watch
 
 .PHONY: input test test-watch

@@ -29,10 +29,6 @@ class Hangul
     @curJamo = ""
     [@choSeong, @jungSeong, @jongSeong] = [null, null, null]
 
-  setChoSeong: (@choSeong) ->
-  setJungSeong: (@jungSeong) ->
-  setJongSeong: (@jongSeong) ->
-
   isWaitChoSeong: ->
     not @jungSeong?
   isWaitJungSeong: ->
