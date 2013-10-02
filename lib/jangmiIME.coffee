@@ -15,7 +15,6 @@ debug = console.log
 UTF8_START_CODE     = 0xAC00
 UTF8_CHOSEONG_DIFF  = '까'.charCodeAt(0) - '가'.charCodeAt(0)
 UTF8_JUNGSEONG_DIFF = '개'.charCodeAt(0) - '가'.charCodeAt(0)
-UTF8_JONGSEONG_DIFF = '각'.charCodeAt(0) - '가'.charCodeAt(0)
 
 class Hangul
   ###
@@ -38,32 +37,67 @@ class Hangul
 
   add: (jamo) ->
     @curJamo += jamo
-    debug ">#{jamo}< ==> #{@curJamo}"
-    debug "isWaitSeong: #{@isWaitJungSeong()}"
-    debug "isWaitJungSeong: #{@isWaitJungSeong()}"
+    debug """
+    \nadded:>#{jamo}< ==> #{@curJamo}
+    wait[#{@isWaitChoSeong()}|#{@isWaitJungSeong()}|#{@isWaitJongSeong()}]"
+    """
     if @isWaitChoSeong()
       if choSeongMap.hasOwnProperty @curJamo
         @choSeong = @curJamo
       else
-        if jungSeongMap.hasOwnProperty jamo
+        if choSeongMap.hasOwnProperty jamo
+          @listener.write @peep()
+          @choSeong = @curJamo = jamo
+        else if jungSeongMap.hasOwnProperty jamo
           if hangul.isWaitJungSeong()
-            @curJamo = jamo
-            @jungSeong = @curJamo
+            @jungSeong = @curJamo = jamo
           else
+            if @choSeong?.length > 0
+              @listener.write @peep()
+              @reset()
             @listener.write jamo
     else if @isWaitJungSeong()
-    else if isWaitJongSeong()
+      if jungSeongMap.hasOwnProperty @curJamo
+        @jungSeong = @curJamo
+      else
+        if jongSeongMap.hasOwnProperty jamo
+          if hangul.isWaitJongSeong()
+            @jongSeong = @curJamo = jamo
+          else
+            @listener.write @peep()
+            @reset()
+            @add jamo
+    else if @isWaitJongSeong()
+      if jongSeongMap.hasOwnProperty @curJamo
+        @jongSeong = @curJamo
+      else
+        if jungSeongMap.hasOwnProperty jamo
+          if @jongSeong? and choSeongMap.hasOwnProperty @jongSeong
+            @curJamo = jamo
+            [temp, @jongSeong]      = [@jongSeong, null]
+            @listener.write @peep()
+            [@choSeong, @jungSeong] = [temp, @curJamo]
+        else
+          @listener.write @peep()
+          @reset()
+          @add jamo
     else
+      debug "What situation?"
+      @reset()
+      @add jamo
 
   ###
     peep current hangul
   ###
   peep: ->
-    debug "[#{@choSeong}|#{@jungSeong}|#{@jongSeong}]"
+    debug """
+    peep[#{@choSeong}|#{@jungSeong}|#{@jongSeong}]
+    peep[#{choSeongMap[@choSeong]}|#{jungSeongMap[@jungSeong]}|#{jongSeongMap[@jongSeong]}]
+    """
     if @choSeong? and @jungSeong?
-      code = UTF8_START_CODE + choSeongMap[@choSeong]
+      code = UTF8_START_CODE + choSeongMap[@choSeong] * UTF8_CHOSEONG_DIFF
       code += jungSeongMap[@jungSeong] * UTF8_JUNGSEONG_DIFF
-      code += jongSeongMap[@jongSeong] * UTF8_JONGSEONG_DIFF if @jongSeong?
+      code += jongSeongMap[@jongSeong] if @jongSeong?
       String.fromCharCode code
     else
       @choSeong
@@ -80,11 +114,11 @@ exports.reset = ->
 
 exports.jamoIn = (jamo) ->
   hangul.add jamo
-  if written?
-    [ret, written] = [written, null]
-    ret
-  else
-    hangul.peep()
+  peep = hangul.peep()
+  result = if written? then written else ""
+  result += if peep? then peep else ""
+  written = null
+  return result
 
 
 choSeongMap =
@@ -109,74 +143,62 @@ choSeongMap =
   'ㅎ':18#'ᄒ'
 
 jungSeongMap =
-  'ㅏ':0  #'ᅡ'
-  'ㅐ':1  #'ᅢ'
-  'ㅑ':2  #'ᅣ'
-  'ㅒ':3  #'ᅤ'
-  'ㅓ':4  #'ᅥ'
-  'ㅔ':5  #'ᅦ'
-  'ㅕ':6  #'ᅧ'
-  'ㅖ':7  #'ᅨ'
-  'ㅗ':8  #'ᅩ'
-  'ㅘ':9  #'ᅪ'
-  'ㅗㅏ':9  #'ᅪ'
-  'ㅙ':10 #'ᅫ'
-  'ㅗㅐ':10 #'ᅫ'
-  'ㅚ':11 #'ᅬ'
-  'ㅗㅣ':11 #'ᅬ'
-  'ㅛ':12 #'ᅭ'
-  'ㅜ':13 #'ᅮ'
-  'ㅝ':14 #'ᅯ'
-  'ㅜㅓ':14 #'ᅯ'
-  'ㅞ':15 #'ᅰ'
-  'ㅜㅔ':15 #'ᅰ'
-  'ㅟ':16 #'ᅱ'
-  'ㅜㅣ':16 #'ᅱ'
-  'ㅠ':17 #'ᅲ'
-  'ㅡ':18 #'ᅳ'
-  'ㅢ':19 #'ᅴ'
-  'ㅡㅣ':19 #'ᅴ'
-  'ㅣ':20 #'ᅵ'
+  'ㅏ'   : 0  #'ᅡ'
+  'ㅐ'   : 1  #'ᅢ'
+  'ㅑ'   : 2  #'ᅣ'
+  'ㅒ'   : 3  #'ᅤ'
+  'ㅓ'   : 4  #'ᅥ'
+  'ㅔ'   : 5  #'ᅦ'
+  'ㅕ'   : 6  #'ᅧ'
+  'ㅖ'   : 7  #'ᅨ'
+  'ㅗ'   : 8  #'ᅩ'
+  'ㅘ'   : 9  #'ᅪ'
+  'ㅗㅏ' : 9  #'ᅪ'
+  'ㅙ'   : 10 #'ᅫ'
+  'ㅗㅐ' : 10 #'ᅫ'
+  'ㅚ'   : 11 #'ᅬ'
+  'ㅗㅣ' : 11 #'ᅬ'
+  'ㅛ'   : 12 #'ᅭ'
+  'ㅜ'   : 13 #'ᅮ'
+  'ㅝ'   : 14 #'ᅯ'
+  'ㅜㅓ' : 14 #'ᅯ'
+  'ㅞ'   : 15 #'ᅰ'
+  'ㅜㅔ' : 15 #'ᅰ'
+  'ㅟ'   : 16 #'ᅱ'
+  'ㅜㅣ' : 16 #'ᅱ'
+  'ㅠ'   : 17 #'ᅲ'
+  'ㅡ'   : 18 #'ᅳ'
+  'ㅢ'   : 19 #'ᅴ'
+  'ㅡㅣ' : 19 #'ᅴ'
+  'ㅣ'   : 20 #'ᅵ'
 
 jongSeongMap =
-  'ᆨ':0
-  'ᆩ':1
-  'ᆪ':2
-  'ᆫ':3
-  'ᆬ':4
-  'ᆭ':5
-  'ᆮ':6
-  'ᆯ':7
-  'ᆰ':8
-  'ᆱ':9
-  'ᆲ':10
-  'ᆳ':11
-  'ᆴ':12
-  'ᆵ':13
-  'ᆶ':14
-  'ᆷ':15
-  'ᆸ':16
-  'ᆹ':17
-  'ᆺ':18
-  'ᆻ':19
-  'ᆼ':20
-  'ᆽ':21
-  'ᆾ':22
-  'ᆿ':23
-  'ᇀ':24
-  'ᇁ':25
-  'ᇂ':26
-  'ᇃ':27
-  'ᇄ':28
-  'ᇅ':29
-  'ᇆ':30
-  'ᇇ':31
-  'ᇈ':32
-  'ᇉ':33
-  'ᇊ':34
-  'ᇋ':35
-  'ᇌ':36
-  'ᇍ':37
-  'ᇎ':38
+  'ㄱ'   : 1  #'ᆨ'
+  'ㄲ'   : 2  #'ᆩ'
+  'ㄱㅅ' : 3  #'ᆪ'
+  'ㄴ'   : 4  #'ᆫ'
+  'ㄴㅈ' : 5  #'ᆬ'
+  'ㄴㅎ' : 6  #'ᆭ'
+  'ㄷ'   : 7  #'ᆮ'
+  'ㄹ'   : 8  #'ᆯ'
+  'ㄹㄱ' : 9  #'ᆰ'
+  'ㄹㅁ' : 10  #'ᆱ'
+  'ㄹㅂ' : 11 #'ᆲ'
+  'ㄹㅅ' : 12 #'ᆳ'
+  'ㄹㅌ' : 13 #'ᆴ'
+  'ㄹㅍ' : 14 #'ᆵ'
+  'ㄹㅎ' : 15 #'ᆶ'
+  'ㅁ'   : 16 #'ᆷ'
+  'ㅂ'   : 17 #'ᆸ'
+  'ㅂㅅ' : 18 #'ᆹ'
+  'ㅅ'   : 19 #'ᆺ'
+  'ㅆ'   : 20 #'ᆻ'
+  'ㅇ'   : 21 #'ᆼ'
+  'ㅈ'   : 22 #'ᆽ'
+  'ㅊ'   : 23 #'ᆾ'
+  'ㅋ'   : 24 #'ᆿ'
+  'ㅌ'   : 25 #'ᇀ'
+  'ㅍ'   : 26 #'ᇁ'
+  'ㅎ'   : 27 #'ᇂ'
 
 
