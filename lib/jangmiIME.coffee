@@ -11,6 +11,7 @@ Range
 ###
 
 debug = console.log
+debug = ->
 
 UTF8_START_CODE     = 0xAC00
 UTF8_CHOSEONG_DIFF  = '까'.charCodeAt(0) - '가'.charCodeAt(0)
