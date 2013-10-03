@@ -1,21 +1,24 @@
 ###
+Copyright (c) 2013 BYUN Sangpil(sangpire@gmail.com)
+Released under the BSD-2-Clause license.
+
 Reference: 
   - Hangul Jamo : http://www.unicode.org/charts/PDF/U1100.pdf
   - Hangul Compatibility Jamo: http://www.unicode.org/charts/PDF/U3130.pdf
   - Hangul Syllables: http://www.unicode.org/charts/PDF/UAC00.pdf
-
-Range
-  choSeong = [0x1100..0x1112]
-  jungSeong = [0x1161..0x1175]
-  jongSeong = [0x11A8..0x11CE]
 ###
 
-debug = console.log
+info = debug = console.log
+info = ->
 debug = ->
+
 
 UTF8_START_CODE     = 0xAC00
 UTF8_CHOSEONG_DIFF  = '까'.charCodeAt(0) - '가'.charCodeAt(0)
 UTF8_JUNGSEONG_DIFF = '개'.charCodeAt(0) - '가'.charCodeAt(0)
+
+isHangulCompatibilityJamo = (ch) ->
+  0x3131 <= ch.charCodeAt(0) <= 0x318e #Hangul Compatibility Jamo
 
 class Hangul
   ###
@@ -37,6 +40,11 @@ class Hangul
     @choSeong? and @jungSeong?
 
   add: (jamo) ->
+    if not isHangulCompatibilityJamo jamo
+      debug "isNotHangulCompatibilityJamo=>#{jamo}"
+      @listener.write @peep()+jamo
+      @reset()
+      @curJamo = ""
     @curJamo += jamo
     debug """
     \nadded:>#{jamo}< ==> #{@curJamo}
@@ -101,20 +109,23 @@ class Hangul
       code += jongSeongMap[@jongSeong] if @jongSeong?
       String.fromCharCode code
     else
-      @choSeong
+      if @choSeong? then @choSeong else ""
+
 
 
 written = null
 hangul = new Hangul
   write: (gul) ->
-    debug "hangul writed as #{gul}"
+    info "hangul writed as #{gul}"
     written = gul
 
 exports.reset = ->
   hangul.reset()
 
 exports.jamoIn = (jamo) ->
+ 
   hangul.add jamo
+  
   peep = hangul.peep()
   result = if written? then written else ""
   result += if peep? then peep else ""

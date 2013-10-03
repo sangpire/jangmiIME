@@ -10,9 +10,11 @@ stdin.setEncoding "utf8"
 stdin.setRawMode true
 
 stdin.on 'keypress', (ch, key) ->
+  console.log ch.charCodeAt(0).toString(16)
   if key?
     process.exit() if key.ctrl and key.name is 'c'
-  ime.jamoIn char2JaMap[ch] ? ch
+  console.log ime.jamoIn char2JaMap[ch] ? ch
+
 
 char2JaMap =
   q: 'ㅂ'

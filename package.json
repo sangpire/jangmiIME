@@ -1,6 +1,6 @@
 {
   "name": "jangmiIME",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Korean Chractor(Hangul) IME",
   "main": "index.coffee",
   "author": {
