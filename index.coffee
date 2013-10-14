@@ -1,1 +1,1 @@
-module.exports = require './lib/jangmiIME.coffee'
+module.exports = require './src/jangmiIME.coffee'
