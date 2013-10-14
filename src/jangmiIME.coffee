@@ -147,6 +147,8 @@ class JangmiIME
     curGul = @peep()
     @handler.changed curGul if curGul?
 
+  ieEmpty: ->
+    @choSeong.length + @jungSeong.length + @jongSeong.length is 0
 
   ###
   Add KeyCode
@@ -222,13 +224,17 @@ class JangmiIME
   Delete Last Input
   ###
   back: ->
-    if @jongSeong.length > 0
-      @jongSeong.pop()
-    else if @jungSeong.length > 0
-      @jungSeong.pop()
-    else if @choSeong.length  > 0
-      @choSeong.pop()
-    @changed()
+    if @curJamo.length > 0
+      @curJamo.pop()
+      @changed()
+    else
+      switch @curJamo
+        when @jungSeong
+          @curJamo = @choSeong
+          @back()
+        when @jongSeong
+          @curJamo = @jungSeong
+          @back()
 
   ###
     peep current hangul
