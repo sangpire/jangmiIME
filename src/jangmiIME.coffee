@@ -147,7 +147,7 @@ class JangmiIME
     curGul = @peep()
     @handler.changed curGul if curGul?
 
-  ieEmpty: ->
+  isEmpty: ->
     @choSeong.length + @jungSeong.length + @jongSeong.length is 0
 
   ###
