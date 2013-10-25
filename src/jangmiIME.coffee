@@ -1,6 +1,10 @@
 ###
-Copyright (c) 2013 BYUN Sangpil(sangpire@gmail.com)
-Released under the BSD-2-Clause license.
+
+ JangmiIME
+ https://github.com/sangpire/jangmiIME
+
+ Copyright 2013 BYUN Sangpil(sangpire@gmail.com)
+ JangmiIME under the Apache license, Version 2.0
 
 Reference: 
   - Hangul Jamo : http://www.unicode.org/charts/PDF/U1100.pdf
