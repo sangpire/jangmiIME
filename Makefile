@@ -1,12 +1,12 @@
 
 MOCHA = ./node_modules/mocha/bin/mocha
-MOCHA_OPTS = --bail --compilers coffee:coffee-script --reporter spec
+MOCHA_OPTS = --bail --compilers coffee:coffee-script/register --reporter spec
 
 input:
 	coffee input.coffee
 
 test:
-	@${MOCHA} ${MOCHA_OPTS} 
+	@${MOCHA} ${MOCHA_OPTS}
 
 test-watch:
 	@${MOCHA} ${MOCHA_OPTS} --watch
