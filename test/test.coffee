@@ -17,7 +17,7 @@ assertKeyCodeAdd = (inputKeyCode, expectedAddedGul, expectedChangedGul, expected
   assert.equal addedGul      , expectedAddedGul      if expectedAddedGul?
   assert.equal changedGul    , expectedChangedGul    if expectedChangedGul?
   assert.equal passedKeyCode , expectedPassedKeyCode if expectedPassedKeyCode?
- 
+
 assertJamoAdd = (jamo, expectedAddedGul, expectedChangedGul, expectedPassedKeyCode)->
   assertKeyCodeAdd jamo.charCodeAt(0), expectedAddedGul, expectedChangedGul, expectedPassedKeyCode
 
@@ -56,6 +56,10 @@ describe "JangmiIME", ->
     assertJamoAdd 'ㅇ' , null , '장'
     assertJamoAdd 'ㅁ' , 'ㅁ'
     assertJamoAdd 'ㅣ' , null , '미'
+
+  it "should return ㅏㄱ when type 'ㅏㄱ'", ->
+    assertJamoAdd 'ㅏ' , 'ㅏ'
+    assertJamoAdd 'ㄱ' , 'ㄱ'
 
   it "should return 깨끗 when type 'ㄱㄱㅐㄲㅡㅅ'", ->
     assertJamoAdd 'ㄱ' , 'ㄱ'

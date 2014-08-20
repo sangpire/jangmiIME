@@ -6,7 +6,7 @@
  Copyright 2013 BYUN Sangpil(sangpire@gmail.com)
  JangmiIME under the Apache license, Version 2.0
 
-Reference: 
+Reference:
   - Hangul Jamo : http://www.unicode.org/charts/PDF/U1100.pdf
   - Hangul Compatibility Jamo: http://www.unicode.org/charts/PDF/U3130.pdf
   - Hangul Syllables: http://www.unicode.org/charts/PDF/UAC00.pdf
@@ -199,7 +199,10 @@ class JangmiIME
               @curJamo.push jamo
               @changed()
             else
-              if jongSeongMap.hasOwnProperty jamo
+              if @choSeong.length is 0
+                @reset()
+                @add keyCode
+              else if jongSeongMap.hasOwnProperty jamo
                 @jongSeong.push jamo
                 @curJamo = @jongSeong
                 @changed()
@@ -264,7 +267,7 @@ class JangmiIME
         code = UTF8_HANGUL_COMPATIBILITY_START + compatibilityMultiJamoMap[@jungSeong.join("")]
       else
         return ""
-    
+
     debug """
     } => #{String.fromCharCode(code)}
     """
