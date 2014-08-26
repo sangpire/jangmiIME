@@ -148,3 +148,9 @@ describe "JangmiIME", ->
 
   it "should return 'ㄱ' when type 'ㄱ'", ->
     assertJamoAdd 'ㄱ' , 'ㄱ'
+
+  it "should return 어ㅠㅠ when type 'ㅇㅓㅠㅠ'", ->
+    assertJamoAdd 'ㅇ' , 'ㅇ'
+    assertJamoAdd 'ㅓ' , null , '어'
+    assertJamoAdd 'ㅠ' , 'ㅠ'
+    assertJamoAdd 'ㅠ' , 'ㅠ'

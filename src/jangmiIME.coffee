@@ -184,30 +184,26 @@ class JangmiIME
               @curJamo.push jamo
               @changed()
             else
-              if choSeongMap.hasOwnProperty jamo
-                @reset()
-                @add keyCode
-              else if jungSeongMap.hasOwnProperty jamo
+              if jungSeongMap.hasOwnProperty jamo
                 @jungSeong.push jamo
                 @curJamo = @jungSeong
                 @changed()
               else
-                debug "CASE2"
+                @reset()
+                @add keyCode
           when @jungSeong
             debug ">JUNGSEONG"
             if jungSeongMap.hasOwnProperty curJamo
               @curJamo.push jamo
               @changed()
             else
-              if @choSeong.length is 0
-                @reset()
-                @add keyCode
-              else if jongSeongMap.hasOwnProperty jamo
+              if @choSeong.length > 0 and jongSeongMap.hasOwnProperty jamo
                 @jongSeong.push jamo
                 @curJamo = @jongSeong
                 @changed()
               else
-                debug "CASE1"
+                @reset()
+                @add keyCode
           when @jongSeong
             debug ">JONGSEONG"
             if jongSeongMap.hasOwnProperty curJamo
@@ -224,7 +220,6 @@ class JangmiIME
                 @added()
               else
                 @reset()
-                @curJamo = null
                 @add keyCode
 
   ###
